@@ -6,6 +6,7 @@ import Message from './Message'
 import ArticleForm from './ArticleForm'
 import Spinner from './Spinner'
 import axios from 'axios'
+import axiosWithAuth from '../axios'
 
 const articlesUrl = 'http://localhost:9000/api/articles'
 const loginUrl = 'http://localhost:9000/api/login'
@@ -26,14 +27,8 @@ export default function App() {
     window.localStorage.removeItem('token')
     redirectToLogin()
     setMessage('Goodbye!')
-    //done, not passing
-
-    // ✨ implement
-    // If a token is in local storage it should be removed,
-    // and a message saying "Goodbye!" should be set in its proper state.
-    // In any case, we should redirect the browser back to the login screen,
-    // using the helper above.
   }
+
 
   const login = ({ username, password }) => {
     setSpinnerOn(true)
@@ -44,7 +39,6 @@ export default function App() {
       window.localStorage.setItem('token', token)
       redirectToArticles()
       setMessage(res.data.message)
-      console.log(res)
     })
     .catch(err => {
       setMessage(err.response.data.message)
@@ -63,7 +57,19 @@ export default function App() {
   }
 
   const getArticles = () => {
-    // ✨ implement
+    setSpinnerOn(true)
+    axiosWithAuth().get(articlesUrl)
+    .then(res => {
+      setArticles(res.data.articles)
+    })
+    .catch(err => {
+      console.log({ err })
+    })
+    .finally(() => {
+      setSpinnerOn(false)
+    })
+  }
+  // ✨ implement
     // We should flush the message state, turn on the spinner
     // and launch an authenticated request to the proper endpoint.
     // On success, we should set the articles in their proper state and
@@ -71,15 +77,14 @@ export default function App() {
     // If something goes wrong, check the status of the response:
     // if it's a 401 the token might have gone bad, and we should redirect to login.
     // Don't forget to turn off the spinner!
-  }
 
   const postArticle = article => {
-    // ✨ implement
+    
+  }
+ // ✨ implement
     // The flow is very similar to the `getArticles` function.
     // You'll know what to do! Use log statements or breakpoints
     // to inspect the response from the server.
-  }
-
   const updateArticle = ({ article_id, article }) => {
     // ✨ implement
     // You got this!
@@ -106,7 +111,7 @@ export default function App() {
           <Route path="articles" element={
             <>
               <ArticleForm />
-              <Articles />
+              <Articles getArticles={getArticles} articles={articles}/>
             </>
           } />
         </Routes>
