@@ -31,8 +31,8 @@ export default function App() {
 
 
   const login = ({ username, password }) => {
-    setSpinnerOn(true)
     setMessage('')
+    setSpinnerOn(true)
     axios.post(loginUrl, { username, password })
     .then(res => {
       const token = res.data.token
@@ -57,6 +57,7 @@ export default function App() {
   }
 
   const getArticles = () => {
+    setMessage('')
     setSpinnerOn(true)
     axiosWithAuth().get(articlesUrl)
     .then(res => {
@@ -78,26 +79,82 @@ export default function App() {
     // if it's a 401 the token might have gone bad, and we should redirect to login.
     // Don't forget to turn off the spinner!
 
-  const postArticle = article => {
-    
-  }
+    const postArticle = article => {
+      setSpinnerOn(true)
+      axiosWithAuth().post(articlesUrl, article)
+      .then(res => {
+        setArticles([...articles, res.data.article])
+      })
+      .catch(err => {
+        setMessage(err.response.data.message)
+      })
+      .finally(() => {
+        setSpinnerOn(false)
+      })
+    }
  // ✨ implement
     // The flow is very similar to the `getArticles` function.
     // You'll know what to do! Use log statements or breakpoints
     // to inspect the response from the server.
-  const updateArticle = ({ article_id, article }) => {
-    // ✨ implement
-    // You got this!
-  }
+  
+  
 
   const deleteArticle = article_id => {
-    // ✨ implement
+    setSpinnerOn(true)
+    axiosWithAuth().delete(`${articlesUrl}/${article_id}`)
+    .then(res => {
+      setMessage(res.data.message)
+      setArticles(articles.filter(art => {
+        return art.article_id !== article_id
+      }))
+    })
+    .catch(err => {
+      setMessage(err.response.data.message)
+    })
+    .finally(() => {
+      setSpinnerOn(false)
+    })
   }
+
+  const putArticle = article => {
+    setSpinnerOn(true)
+    const { article_id, ...changes } = article
+    axiosWithAuth().put(`${articlesUrl}/${article_id}`, changes)
+    .then(res => {
+      setArticles(articles.map(art => {
+        return art.article_id === article_id
+        ? res.data.article
+        : art
+      }))
+      setMessage(res.data.message)
+      setCurrentArticleId(null)
+    })
+    .catch(err => {
+      setMessage(err.respose.data.message)
+    })
+    .finally(() => {
+      setSpinnerOn(false)
+    })
+  }
+
+  const onSubmit = article => {
+    if (currentArticleId) {
+      putArticle(article)
+    } else {
+      postArticle(article)
+    }
+  }
+
+  const updateArticle = (article_id) => {
+    setCurrentArticleId(article_id)
+    console.log("updating article:", article_id)
+  }
+
 
   return (
     // ✨ fix the JSX: `Spinner`, `Message`, `LoginForm`, `ArticleForm` and `Articles` expect props ❗
     <>
-      <Spinner spinnerOn={spinnerOn}/> 
+      <Spinner on={spinnerOn}/> 
       <Message message={message}/>
       <button id="logout" onClick={logout}>Logout from app</button>
       <div id="wrapper" style={{ opacity: spinnerOn ? "0.25" : "1" }}> {/* <-- do not change this line */}
@@ -110,8 +167,26 @@ export default function App() {
           <Route path="/" element={<LoginForm login={login} />} />
           <Route path="articles" element={
             <>
-              <ArticleForm />
-              <Articles getArticles={getArticles} articles={articles}/>
+             <ArticleForm 
+              onSubmit={onSubmit} 
+              article={articles.find(art => art.article_id === currentArticleId)}
+              postArticle={postArticle}
+              deleteArticle={deleteArticle} 
+              getArticles={getArticles} 
+              updateArticle={updateArticle}
+              articles={articles} 
+              setCurrentArticleId={setCurrentArticleId}
+              // spinner={spinner}
+             
+              />
+            <Articles
+              deleteArticle={deleteArticle} 
+              getArticles={getArticles} 
+              updateArticle={updateArticle}
+              articles={articles} 
+              setCurrentArticleId={setCurrentArticleId}
+              // spinner={spinner}
+             />
             </>
           } />
         </Routes>

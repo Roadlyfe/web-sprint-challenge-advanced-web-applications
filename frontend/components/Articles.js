@@ -33,8 +33,8 @@ export default function Articles(props) {
                 <p>{art.text}</p>
                 <p>topic: {art.topic}</p>
               </div>
-              <button onClick={evt => deleteArticle(art.article_id)}>Delete</button>
-              <button onClick={evt => updateArticle(art.article_id)}>Update</button>
+                <button disabled={true} onClick={Function.prototype}>Edit</button>
+                <button disabled={true} onClick={Function.prototype}>Delete</button>
 
             </div>
           )
