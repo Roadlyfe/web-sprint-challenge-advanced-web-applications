@@ -62,6 +62,7 @@ export default function App() {
     axiosWithAuth().get(articlesUrl)
     .then(res => {
       setArticles(res.data.articles)
+      setMessage(res.data.message)
     })
     .catch(err => {
       console.log({ err })
