@@ -81,10 +81,12 @@ export default function App() {
     // Don't forget to turn off the spinner!
 
     const postArticle = article => {
+      setMessage('')
       setSpinnerOn(true)
       axiosWithAuth().post(articlesUrl, article)
       .then(res => {
         setArticles([...articles, res.data.article])
+        setMessage(res.data.message)
       })
       .catch(err => {
         setMessage(err.response.data.message)
@@ -149,6 +151,7 @@ export default function App() {
   const updateArticle = (article_id) => {
     setCurrentArticleId(article_id)
     console.log("updating article:", article_id)
+    setSpinnerOn(false)
   }
 
 
